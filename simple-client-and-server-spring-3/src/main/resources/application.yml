@@ -1,6 +1,12 @@
 server:
   port: 8089
 
+quickfixj:
+  client:
+    enabled: true
+  server:
+    enabled: true
+
 management:
   endpoint:
     quickfixjclient:
