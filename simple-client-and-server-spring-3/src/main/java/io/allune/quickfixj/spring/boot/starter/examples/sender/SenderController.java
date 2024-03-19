@@ -32,6 +32,7 @@ import quickfix.field.Side;
 import quickfix.field.Symbol;
 import quickfix.field.Text;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -72,9 +73,21 @@ public class SenderController {
 		messageMap.put("OrderCancelRequest", new quickfix.fix41.OrderCancelRequest(
 				new OrigClOrdID("123"),
 				new ClOrdID("321"),
-				new Symbol("LNUX"),
+				new Symbol("LNUX"), // VA Linux https://www.cnet.com/tech/tech-industry/va-linux-founder-becomes-paper-billionaire-in-a-day/
 				new Side(Side.BUY)));
 		return messageMap;
+	}
+
+	private void getMessageSendToSessionForVersion(String fixVersion, String messageType, ArrayList<SessionID> sessions) {
+		Map<String, Message> stringMessageMap = messageMap.get(fixVersion);
+		Message message = stringMessageMap.get(messageType);
+		message.setField(new StringField(Text.FIELD, "Text: " + randomUUID().toString()));
+
+		SessionID sessionID = sessions.stream()
+			.filter(id -> id.getBeginString().equals(fixVersion))
+			.findFirst()
+			.orElseThrow(RuntimeException::new);
+		quickFixJTemplate.send(message, sessionID);
 	}
 
 	private static Map<String, Message> initialiseFix50MessageMap() {
@@ -86,29 +99,14 @@ public class SenderController {
 	@RequestMapping("/send-client-message")
 	@ResponseStatus(OK)
 	public void sendMessageToClient(@RequestParam("fixVersion") String fixVersion, @RequestParam("messageType") String messageType) {
-		Map<String, Message> stringMessageMap = messageMap.get(fixVersion);
-		Message message = stringMessageMap.get(messageType);
-		message.setField(new StringField(Text.FIELD, "Text: " + randomUUID().toString()));
-
-		SessionID sessionID = serverAcceptor.getSessions().stream()
-				.filter(id -> id.getBeginString().equals(fixVersion))
-				.findFirst()
-				.orElseThrow(RuntimeException::new);
-		quickFixJTemplate.send(message, sessionID);
+		getMessageSendToSessionForVersion(fixVersion, messageType, serverAcceptor.getSessions());
 	}
 
 	@RequestMapping("/send-server-message")
 	@ResponseStatus(OK)
 	public void sendMessageToServer(@RequestParam("fixVersion") String fixVersion, @RequestParam("messageType") String messageType) {
 
-		Map<String, Message> stringMessageMap = messageMap.get(fixVersion);
-		Message message = stringMessageMap.get(messageType);
-		message.setField(new StringField(Text.FIELD, "Text: " + randomUUID().toString()));
-
-		SessionID sessionID = clientInitiator.getSessions().stream()
-				.filter(id -> id.getBeginString().equals(fixVersion))
-				.findFirst()
-				.orElseThrow(RuntimeException::new);
-		quickFixJTemplate.send(message, sessionID);
+		getMessageSendToSessionForVersion(fixVersion, messageType, clientInitiator.getSessions());
 	}
+
 }
