@@ -85,7 +85,7 @@ public class SenderController {
 
 	@RequestMapping("/send-client-message")
 	@ResponseStatus(OK)
-	public void sendMessageToClient(@RequestParam String fixVersion, @RequestParam String messageType) {
+	public void sendMessageToClient(@RequestParam("fixVersion") String fixVersion, @RequestParam("messageType") String messageType) {
 		Map<String, Message> stringMessageMap = messageMap.get(fixVersion);
 		Message message = stringMessageMap.get(messageType);
 		message.setField(new StringField(Text.FIELD, "Text: " + randomUUID().toString()));
@@ -99,7 +99,7 @@ public class SenderController {
 
 	@RequestMapping("/send-server-message")
 	@ResponseStatus(OK)
-	public void sendMessageToServer(@RequestParam String fixVersion, @RequestParam String messageType) {
+	public void sendMessageToServer(@RequestParam("fixVersion") String fixVersion, @RequestParam("messageType") String messageType) {
 
 		Map<String, Message> stringMessageMap = messageMap.get(fixVersion);
 		Message message = stringMessageMap.get(messageType);

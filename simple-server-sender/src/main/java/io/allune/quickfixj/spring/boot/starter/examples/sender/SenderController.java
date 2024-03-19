@@ -99,7 +99,7 @@ public class SenderController {
 
 	@RequestMapping("/send-message")
 	@ResponseStatus(OK)
-	public void sendMessage(@RequestParam String fixVersion, @RequestParam String messageType) {
+	public void sendMessage(@RequestParam("fixVersion") String fixVersion, @RequestParam("messageType") String messageType) {
 
 		Map<String, Message> stringMessageMap = messageMap.get(fixVersion);
 		Message message = stringMessageMap.get(messageType);

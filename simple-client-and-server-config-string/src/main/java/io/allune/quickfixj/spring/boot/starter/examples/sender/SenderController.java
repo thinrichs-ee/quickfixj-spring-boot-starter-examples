@@ -32,6 +32,7 @@ import quickfix.field.Side;
 import quickfix.field.Symbol;
 import quickfix.field.Text;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -83,32 +84,27 @@ public class SenderController {
 		return messageMap;
 	}
 
-	@RequestMapping("/send-client-message")
-	@ResponseStatus(OK)
-	public void sendMessageToClient(@RequestParam String fixVersion, @RequestParam String messageType) {
+	private void createAndSendMessage(String fixVersion, String messageType, ArrayList<SessionID> sessions) {
 		Map<String, Message> stringMessageMap = messageMap.get(fixVersion);
 		Message message = stringMessageMap.get(messageType);
 		message.setField(new StringField(Text.FIELD, "Text: " + randomUUID().toString()));
 
-		SessionID sessionID = serverAcceptor.getSessions().stream()
-				.filter(id -> id.getBeginString().equals(fixVersion))
-				.findFirst()
-				.orElseThrow(RuntimeException::new);
+		SessionID sessionID = sessions.stream()
+			.filter(id -> id.getBeginString().equals(fixVersion))
+			.findFirst()
+			.orElseThrow(RuntimeException::new);
 		quickFixJTemplate.send(message, sessionID);
+	}
+
+	@RequestMapping("/send-client-message")
+	@ResponseStatus(OK)
+	public void sendMessageToClient(@RequestParam("fixVersion") String fixVersion, @RequestParam("messageType") String messageType) {
+		createAndSendMessage(fixVersion, messageType, serverAcceptor.getSessions());
 	}
 
 	@RequestMapping("/send-server-message")
 	@ResponseStatus(OK)
-	public void sendMessageToServer(@RequestParam String fixVersion, @RequestParam String messageType) {
-
-		Map<String, Message> stringMessageMap = messageMap.get(fixVersion);
-		Message message = stringMessageMap.get(messageType);
-		message.setField(new StringField(Text.FIELD, "Text: " + randomUUID().toString()));
-
-		SessionID sessionID = clientInitiator.getSessions().stream()
-				.filter(id -> id.getBeginString().equals(fixVersion))
-				.findFirst()
-				.orElseThrow(RuntimeException::new);
-		quickFixJTemplate.send(message, sessionID);
+	public void sendMessageToServer(@RequestParam("fixVersion") String fixVersion, @RequestParam("messageType") String messageType) {
+		createAndSendMessage(fixVersion, messageType, clientInitiator.getSessions());
 	}
 }
