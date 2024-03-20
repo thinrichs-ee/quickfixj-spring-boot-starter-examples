@@ -6,6 +6,7 @@ quickfixj:
   server:
     config: ${QUICKFIXJ_SERVER_CONFIG_FILE:classpath:quickfixj-server.cfg}
     jmx-enabled: true
+    enabled: true
 
 server:
   port: 8080

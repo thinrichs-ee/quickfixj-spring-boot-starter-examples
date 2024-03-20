@@ -29,7 +29,6 @@ import quickfix.MessageStoreFactory;
 import quickfix.SessionSettings;
 import quickfix.ThreadedSocketInitiator;
 
-@EnableQuickFixJServer
 @SpringBootApplication
 public class SimpleServerSender {
 

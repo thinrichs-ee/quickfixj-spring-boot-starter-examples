@@ -151,7 +151,7 @@ public class SenderController {
 
 
 		Session.sendToTarget(executionReport, sessionID);
-		return ResponseEntity.ok("OK");
+		return ResponseEntity.ok(executionReport.toXML());
 	}
 //	AllocationInstruction
 
